@@ -1,0 +1,15 @@
+[package]
+name = "dtorrent"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sha-1 = '0.10.0'
+native-tls = "0.2"
+chrono = "0.4"
+rand = "0.8.5"
+bencoder = { path = "../bencoder" }
+logger = { path = "../logger"}
+url_encoder = { path = "../url_encoder" }

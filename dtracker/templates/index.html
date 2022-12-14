@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>dTracker | Statistics</title>
+    <link rel="icon" type="image/x-icon" href="../../docs/logo_dtracker.png" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <select id="since">
+        <option selected value="1">Última hora</option>
+        <option value="5">Últimas 5 horas</option>
+        <option value="24">Último día</option>
+        <option value="72">Últimos 3 días</option>
+      </select>
+
+      <select id="groupBy">
+        <option selected value="1">Por minuto</option>
+        <option value="10">Por 10 minutos</option>
+        <option value="30">Por 30 minutos</option>
+        <option value="60">Por hora</option>
+      </select>
+    </div>
+
+    <div style="width: 95%; margin: 0 auto">
+      <canvas id="myChart"></canvas>
+    </div>
+
+    <script src="./graph.js"></script>
+  </body>
+</html>

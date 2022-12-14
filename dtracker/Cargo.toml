@@ -1,0 +1,15 @@
+[package]
+name = "dtracker"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4"
+logger = { path = "../logger"}
+rand = "0.8.5"
+bencoder = {path = "../bencoder"}
+url_encoder = { path = "../url_encoder" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
