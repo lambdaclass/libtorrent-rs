@@ -1,0 +1,16 @@
+.PHONY: build run check clippy docs test
+
+build:
+	cargo build --release
+
+check:
+	cargo check
+
+clippy:
+	cargo clippy  -- -D warnings
+
+docs:
+	cargo doc --verbose --release --locked --no-deps
+
+test:
+	cargo test
