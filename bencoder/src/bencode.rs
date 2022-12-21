@@ -8,7 +8,7 @@ pub enum Bencode {
     BDict(BTreeMap<Vec<u8>, Bencode>),
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum BencodeError {
     InvalidBencode,
     InvalidBencodeType,
@@ -119,38 +119,33 @@ impl Bencode {
         while data[i] != b':' {
             i += 1;
         }
-        let length = &data[0..i];
-        let length = match String::from_utf8(length.to_vec()) {
-            Ok(s) => s,
-            Err(_) => return Err(BencodeError::InvalidBencodeString),
-        };
-        let length = match length.parse::<i64>() {
-            Ok(n) => n,
-            Err(_) => return Err(BencodeError::InvalidBencodeString),
-        };
-        let mut i = i + 1;
-        let mut string = Vec::new();
-        for _ in 0..length {
-            string.push(data[i]);
-            i += 1;
-        }
-        Ok((Bencode::BString(string), i))
+        let length =
+            std::str::from_utf8(&data[0..i]).map_err(|_| BencodeError::InvalidBencodeString)?;
+        let length: usize = length
+            .parse()
+            .map_err(|_| BencodeError::InvalidBencodeString)?;
+
+        i += 1;
+
+        let string: Vec<u8> = data.iter().skip(i).take(length).cloned().collect();
+        let len = string.len();
+
+        Ok((Bencode::BString(string), i + len))
     }
 
     fn decode_number(data: &[u8]) -> Result<(Bencode, usize), BencodeError> {
         let mut i = 1;
+
         while data[i] != b'e' {
             i += 1;
         }
-        let number = &data[1..i];
-        let number = match String::from_utf8(number.to_vec()) {
-            Ok(s) => s,
-            Err(_) => return Err(BencodeError::InvalidBencodeNumber),
-        };
-        let number = match number.parse::<i64>() {
-            Ok(n) => n,
-            Err(_) => return Err(BencodeError::InvalidBencodeNumber),
-        };
+
+        let number =
+            std::str::from_utf8(&data[1..i]).map_err(|_| BencodeError::InvalidBencodeNumber)?;
+        let number: i64 = number
+            .parse()
+            .map_err(|_| BencodeError::InvalidBencodeNumber)?;
+
         Ok((Bencode::BNumber(number), i + 1))
     }
 
@@ -202,12 +197,12 @@ impl Bencode {
     /// ```
     pub fn encode(bencode: &dyn ToBencode) -> Vec<u8> {
         let bencode = bencode.to_bencode();
-        Bencode::do_encode(bencode)
+        Bencode::do_encode(&bencode)
     }
 
-    fn do_encode(bencode: Bencode) -> Vec<u8> {
+    fn do_encode(bencode: &Bencode) -> Vec<u8> {
         match bencode {
-            Bencode::BNumber(n) => Bencode::encode_number(n),
+            Bencode::BNumber(n) => Bencode::encode_number(*n),
             Bencode::BString(s) => Bencode::encode_string(s),
             Bencode::BList(l) => Bencode::encode_list(l),
             Bencode::BDict(d) => Bencode::encode_dict(d),
@@ -221,7 +216,7 @@ impl Bencode {
         encoded
     }
 
-    fn encode_string(s: Vec<u8>) -> Vec<u8> {
+    fn encode_string(s: &[u8]) -> Vec<u8> {
         let mut encoded = Vec::new();
         encoded.extend(s.len().to_string().into_bytes());
         encoded.push(b':');
@@ -229,7 +224,7 @@ impl Bencode {
         encoded
     }
 
-    fn encode_list(l: Vec<Bencode>) -> Vec<u8> {
+    fn encode_list(l: &[Bencode]) -> Vec<u8> {
         let mut encoded = vec![b'l'];
         for bencode in l {
             encoded.extend(Bencode::do_encode(bencode));
@@ -238,10 +233,10 @@ impl Bencode {
         encoded
     }
 
-    fn encode_dict(d: BTreeMap<Vec<u8>, Bencode>) -> Vec<u8> {
+    fn encode_dict(d: &BTreeMap<Vec<u8>, Bencode>) -> Vec<u8> {
         let mut encoded = vec![b'd'];
         for (key, value) in d {
-            encoded.extend(Bencode::do_encode(Bencode::BString(key)));
+            encoded.extend(Bencode::do_encode(&key.to_bencode()));
             encoded.extend(Bencode::do_encode(value));
         }
         encoded.push(b'e');
