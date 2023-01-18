@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufReader, Error, Read},
+    io::{BufReader, Error, Read}, path::Path,
 };
 
 use super::torrent::{FromTorrentError, Torrent};
@@ -23,7 +23,7 @@ impl TorrentParser {
     /// * `ParseError::IoError` - An error occurred while reading the file
     /// * `ParseError::BencodeError` - An error occurred while parsing the bencode
     /// * `ParseError::FromTorrentError` - An error occurred while creating the Torrent struct
-    pub fn parse(filepath: String) -> Result<Torrent, ParseError> {
+    pub fn parse(filepath: &Path) -> Result<Torrent, ParseError> {
         let buffer = match TorrentParser::read_file(filepath) {
             Ok(buffer) => buffer,
             Err(e) => return Err(ParseError::IoError(e)),
@@ -42,7 +42,7 @@ impl TorrentParser {
         Ok(torrent)
     }
 
-    fn read_file(filepath: String) -> Result<Vec<u8>, Error> {
+    fn read_file(filepath: &Path) -> Result<Vec<u8>, Error> {
         let file = File::open(filepath)?;
         let mut reader = BufReader::new(file);
         let mut buffer = Vec::new();
@@ -65,7 +65,7 @@ mod tests {
             b"d8:announce35:https://torrent.ubuntu.com/announce4:infod6:lengthi3654957056e4:name30:ubuntu-22.04-desktop-amd64.iso12:piece lengthi262144e6:pieces64:<hex>BC 07 C0 6A 9D BC 07 C0 6A 9D BC 07 C0 6A 9D BC 07 C0 6A 9Dee";
         create_and_write_file(filepath, contents);
 
-        let torrent = match TorrentParser::parse(filepath.to_string()) {
+        let torrent = match TorrentParser::parse(Path::new(filepath)) {
             Ok(torrent) => torrent,
             Err(e) => {
                 remove_file(filepath);
