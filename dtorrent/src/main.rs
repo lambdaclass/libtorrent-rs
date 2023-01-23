@@ -22,8 +22,6 @@ fn main() {
     let args = Args::parse();
     let file_path = PathBuf::from(args.file.trim());
     let config_path = args.config.trim();
-    dbg!(&file_path);
-    dbg!(&config_path);
 
     // Initializes the server
     let parsed = TorrentParser::parse(&file_path).expect("parser could not find the file");
