@@ -6,6 +6,13 @@ A Rust implementation of the [BitTorrent V2](http://bittorrent.org/beps/bep_0052
 - Rust
 - Cargo
 
+## Running
+To run the program there needs to be a `config.cfg` file in the root of the project. We provide one with default values as an example.
+Then run the program with `cargo` followed by the directory containing the .torrent files:
+```bash
+$ cargo run --bin dtorrent ./torrents/file_name
+```
+
 ## Testing
 Run the test suite:
 ```bash
