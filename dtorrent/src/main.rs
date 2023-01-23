@@ -28,6 +28,6 @@ fn main() {
         logger.new_sender(),
         client_peer_id,
     );
-    println!("Initializing server...");
+    println!("Initializing server ...");
     server.init().expect("Failed to initialize server");
 }
