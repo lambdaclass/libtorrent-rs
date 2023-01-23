@@ -1,3 +1,4 @@
+use clap::Parser;
 use dtorrent::{
     bt_server::server::BtServer, config::cfg::Cfg, torrent_handler::status::AtomicTorrentStatus,
     torrent_parser::parser::TorrentParser,
@@ -8,14 +9,25 @@ use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+#[derive(Parser, Debug)]
+struct Args {
+    #[arg(short, long)]
+    file: String,
+    #[arg(short, long)]
+    config: String,
+}
+
 fn main() {
     // Reads the filepath from the command line argument (Check README)
-    let mut arg = env::args();
-    let path = PathBuf::from((arg.nth(1).expect("Failed to retrieve file path")).trim());
+    let args = Args::parse();
+    let file_path = PathBuf::from(args.file.trim());
+    let config_path = args.config.trim();
+    dbg!(&file_path);
+    dbg!(&config_path);
 
     // Initializes the server
-    let parsed = TorrentParser::parse(&path).expect("parser could not find the file");
-    let config = Cfg::new("./dtorrent/config.cfg").expect("config file not found");
+    let parsed = TorrentParser::parse(&file_path).expect("parser could not find the file");
+    let config = Cfg::new(&config_path).expect("Config file not found or incomplete");
     let (status, _status_reciever) = AtomicTorrentStatus::new(&parsed, config.clone());
     let mut torrent_with_status = HashMap::new();
     torrent_with_status.insert(parsed, Arc::new(status));

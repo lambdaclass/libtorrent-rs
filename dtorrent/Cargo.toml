@@ -13,3 +13,4 @@ rand = "0.8.5"
 bencoder = { path = "../bencoder" }
 logger = { path = "../logger"}
 url_encoder = { path = "../url_encoder" }
+clap = { version = "4.1.1", features = ["derive"] }
