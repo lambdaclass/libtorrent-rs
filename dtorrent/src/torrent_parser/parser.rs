@@ -1,6 +1,7 @@
 use std::{
     fs::File,
-    io::{BufReader, Error, Read}, path::Path,
+    io::{BufReader, Error, Read},
+    path::Path,
 };
 
 use super::torrent::{FromTorrentError, Torrent};
