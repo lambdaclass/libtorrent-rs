@@ -1,6 +1,6 @@
 # libtorrent-rs
 
-A Rust implementation of the [BitTorrent V2](http://bittorrent.org/beps/bep_0052.html) protocol.
+A Rust implementation of the [BitTorrent V2](http://bittorrent.org/beps/bep_0052.html) protocol. For now only V1 is implemented but we're working on V2.
 
 ## Dependencies
 - Rust
