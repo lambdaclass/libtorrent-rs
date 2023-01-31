@@ -1,7 +1,7 @@
 use std::{net::TcpListener, sync::Arc};
 
 use logger::logger_sender::LoggerSender;
-
+use tracing::{error, info};
 use crate::http_server::request_handler::RequestHandler;
 use crate::stats::stats_updater::StatsUpdater;
 use crate::{
@@ -21,7 +21,6 @@ pub struct Server {
     pool: ThreadPool,
     status: Arc<AtomicTrackerStatus>,
     stats_updater: Arc<StatsUpdater>,
-    logger_sender: LoggerSender,
     port: u16,
 }
 
@@ -30,15 +29,13 @@ impl Server {
     pub fn init(
         status: Arc<AtomicTrackerStatus>,
         stats_updater: Arc<StatsUpdater>,
-        logger_sender: LoggerSender,
         port: u16,
     ) -> std::io::Result<Server> {
         let listener = TcpListener::bind(format!("0.0.0.0:{}", port))?;
         Ok(Server {
             listener,
-            pool: ThreadPool::new(1000, logger_sender.clone()),
+            pool: ThreadPool::new(1000),
             status,
-            logger_sender,
             stats_updater,
             port,
         })
@@ -47,21 +44,20 @@ impl Server {
     /// Handles new connections to the server
     pub fn serve(&self) -> std::io::Result<()> {
         let started_msg = format!("Serving on http://0.0.0.0:{}", self.port);
-        self.logger_sender.info(&started_msg);
+        info!(started_msg);
         println!("{}", started_msg);
 
         for stream in self.listener.incoming() {
             let stream = stream?;
             let mut request_handler = RequestHandler::new(stream);
-            let logger = self.logger_sender.clone();
             let status_clone = self.status.clone();
             let stats_updater = self.stats_updater.clone();
             let _ = self.pool.execute(move || {
                 if let Err(error) = request_handler.handle(status_clone, stats_updater) {
-                    logger.error(&format!(
+                    error!(
                         "An error occurred while attempting to handle a request: {:?}",
                         error
-                    ));
+                    );
                 }
             });
         }

@@ -1,4 +1,5 @@
 use super::status::{AtomicTorrentStatus, AtomicTorrentStatusError};
+use tracing::{info, warn, error};
 use crate::{
     config::cfg::Cfg,
     peer::{
@@ -28,7 +29,6 @@ use std::{
 pub struct TorrentHandler {
     torrent: Torrent,
     config: Cfg,
-    logger_sender: LoggerSender,
     torrent_status: Arc<AtomicTorrentStatus>,
     torrent_status_receiver: Receiver<usize>,
     client_peer_id: String,
@@ -48,7 +48,6 @@ impl TorrentHandler {
     pub fn new(
         torrent: Torrent,
         config: Cfg,
-        logger_sender: LoggerSender,
         client_peer_id: String,
     ) -> Self {
         let (torrent_status, torrent_status_receiver) =
@@ -58,7 +57,6 @@ impl TorrentHandler {
             torrent_status: Arc::new(torrent_status),
             torrent,
             config,
-            logger_sender,
             torrent_status_receiver,
             client_peer_id,
         }
@@ -80,11 +78,11 @@ impl TorrentHandler {
             self.client_peer_id.clone(),
         )
         .map_err(TorrentHandlerError::TrackerError)?;
-        self.logger_sender.info("Connected to tracker.");
+        info!("Connected to tracker.");
 
         while !self.torrent_status.is_finished() {
             let peer_list = self.get_peers_list(&tracker_handler)?;
-            self.logger_sender.info("Tracker peer list obtained.");
+            info!("Tracker peer list obtained.");
 
             // Start connection with each peer
             for peer in peer_list {
@@ -124,7 +122,7 @@ impl TorrentHandler {
                 }
             }
         }
-        self.logger_sender.info("Torrent download finished.");
+        info!("Torrent download finished.");
         Ok(())
     }
 
@@ -170,7 +168,6 @@ impl TorrentHandler {
             self.torrent.clone(),
             self.torrent_status.clone(),
             self.config.clone(),
-            self.logger_sender.clone(),
             self.client_peer_id.clone(),
         )
         .map_err(TorrentHandlerError::PeerSessionError)?;
@@ -179,18 +176,17 @@ impl TorrentHandler {
             "Torrent: {} / Peer: {}",
             self.torrent.info.name, peer_name
         ));
-        let peer_logger_sender = self.logger_sender.clone();
 
         let join = builder.spawn(move || match peer_session.start_outgoing_seeder() {
             Ok(_) => (),
             Err(err) => {
-                peer_logger_sender.warn(&format!("{:?}", err));
+                warn!("{:?}", err);
             }
         });
         match join {
             Ok(_) => (),
             Err(err) => {
-                self.logger_sender.error(&format!("{:?}", err));
+                error!("{:?}", err);
                 self.torrent_status
                     .peer_disconnected(&peer)
                     .map_err(TorrentHandlerError::TorrentStatusError)?;

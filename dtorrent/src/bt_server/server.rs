@@ -9,15 +9,15 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use tracing::{debug, error, info, span, warn, Level};
 
 /// Struct for handling the server side.
 ///
-/// To create a new `BtServer`, use BtServer::new(torrent, config, logger_sender).
+/// To create a new `BtServer`, use BtServer::new(torrent, config).
 #[derive(Debug)]
 pub struct BtServer {
     config: Cfg,
     torrents_with_status: HashMap<Torrent, Arc<AtomicTorrentStatus>>,
-    logger_sender: LoggerSender,
     client_peer_id: String,
 }
 
@@ -35,17 +35,15 @@ pub enum BtServerError {
 }
 
 impl BtServer {
-    /// Creates a new `BtServer` from a `HashMap` containing a torrent with its `AtomicTorrentStatus`, a `Config` and a `Logger Sender`.
+    /// Creates a new `BtServer` from a `HashMap` containing a torrent with its `AtomicTorrentStatus` and `Config`.
     pub fn new(
         torrents_with_status: HashMap<Torrent, Arc<AtomicTorrentStatus>>,
         config: Cfg,
-        logger_sender: LoggerSender,
         client_peer_id: String,
     ) -> Self {
         Self {
             config,
             torrents_with_status,
-            logger_sender,
             client_peer_id,
         }
     }
@@ -58,20 +56,15 @@ impl BtServer {
         let listener = TcpListener::bind(format!("0.0.0.0:{}", self.config.tcp_port))
             .map_err(BtServerError::OpeningListenerError)?;
 
-        self.logger_sender
-            .info("Server started, listening for connections.");
+        info!("Server started, listening for connections");
 
         for stream in listener.incoming() {
             match stream {
                 Ok(stream) => match self.handle_connection(stream) {
                     Ok(_) => (),
-                    Err(e) => self
-                        .logger_sender
-                        .warn(&format!("Could't handle incoming connection: {:?}", e)),
+                    Err(e) => warn!("Couldn't handle incoming connection: {:?}", e),
                 },
-                Err(e) => self
-                    .logger_sender
-                    .warn(&format!("Could't handle incoming connection: {:?}", e)),
+                Err(e) => warn!("Couldn't handle incoming connection: {:?}", e),
             }
         }
 
@@ -89,12 +82,7 @@ impl BtServer {
         let mut peer = BtPeer::new(addr.ip().to_string(), addr.port() as i64);
 
         let info_hash = peer.receive_handshake(&mut stream).map_err(|err| {
-            self.logger_sender.warn(&format!(
-                "{:?} for peer: {}:{}",
-                err,
-                addr.ip(),
-                addr.port() as i64
-            ));
+            warn!("{:?} for peer: {}:{}", err, addr.ip(), addr.port() as i64);
             BtServerError::BtPeerError(err)
         })?;
 
@@ -117,7 +105,7 @@ impl BtServer {
                 self.unchoke_peer(peer_session, peer, stream, torrent.clone(), torrent_status)?;
             }
             Err(err) => {
-                self.logger_sender.warn(&format!("{:?}", err));
+                warn!("{:?}", err)
             }
         }
         Ok(())
@@ -155,7 +143,6 @@ impl BtServer {
             torrent.clone(),
             torrent_status.clone(),
             self.config.clone(),
-            self.logger_sender.clone(),
             self.client_peer_id.clone(),
         )
         .map_err(BtServerError::PeerSessionError)?;
@@ -193,21 +180,20 @@ impl BtServer {
             "Torrent: {} / Peer: {}",
             torrent.info.name, peer_name
         ));
-        let peer_logger_sender = self.logger_sender.clone();
 
         let join =
             builder.spawn(
                 move || match peer_session.unchoke_incoming_leecher(&mut stream) {
                     Ok(_) => (),
                     Err(err) => {
-                        peer_logger_sender.warn(&format!("{:?}", err));
+                        warn!("{:?}", err);
                     }
                 },
             );
         match join {
             Ok(_) => (),
             Err(err) => {
-                self.logger_sender.error(&format!("{:?}", err));
+                error!("{:?}", err);
             }
         }
         Ok(())

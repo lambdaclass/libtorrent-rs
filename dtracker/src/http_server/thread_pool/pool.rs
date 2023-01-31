@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use logger::logger_sender::LoggerSender;
-
+use tracing::{info, error};
 use crate::http_server::thread_pool::worker::{Message, Worker};
 
 pub enum ThreadPoolError {
@@ -17,14 +17,13 @@ pub enum ThreadPoolError {
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: Sender<Message>,
-    logger_sender: LoggerSender,
 }
 
 impl ThreadPool {
     /// Creates a new ThreadPool with a given size.
     /// The size is the number of threads in the pool.
     /// If the size is zero or a negative number, the `new` function will panic.
-    pub fn new(size: usize, logger_sender: LoggerSender) -> ThreadPool {
+    pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
 
         let (sender, receiver) = channel();
@@ -37,14 +36,12 @@ impl ThreadPool {
             workers.push(Worker::new(
                 id,
                 Arc::clone(&receiver),
-                logger_sender.clone(),
             ));
         }
 
         ThreadPool {
             workers,
             sender,
-            logger_sender,
         }
     }
 
@@ -65,25 +62,21 @@ impl ThreadPool {
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
-        self.logger_sender
-            .info("Sending terminate message to all workers.");
+        info!("Sending terminate message to all workers.");
 
         for _ in &self.workers {
             if self.sender.send(Message::Terminate).is_err() {
-                self.logger_sender
-                    .error("An error occurred while attempting to drop the thread pool.");
+                error!("An error occurred while attempting to drop the thread pool.");
             };
         }
 
-        self.logger_sender.info("Shutting down all workers.");
+        info!("Shutting down all workers.");
 
         for worker in &mut self.workers {
-            self.logger_sender
-                .info(format!("Shutting down worker {}", worker.id).as_str());
+            info!("Shutting down worker {}", worker.id);
             if let Some(thread) = worker.thread.take() {
                 if thread.join().is_err() {
-                    self.logger_sender
-                        .error("An error occurred while attempting to join a thread pool thread.");
+                    error!("An error occurred while attempting to join a thread pool thread.");
                 };
             }
         }

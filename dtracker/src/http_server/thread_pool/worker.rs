@@ -3,6 +3,7 @@ use std::{
     thread,
 };
 
+use tracing::info;
 use logger::logger_sender::LoggerSender;
 
 type Job = Box<dyn FnOnce() + Send + 'static>;
@@ -23,18 +24,17 @@ impl Worker {
     pub fn new(
         id: usize,
         receiver: Arc<Mutex<Receiver<Message>>>,
-        logger_sender: LoggerSender,
     ) -> Worker {
         let thread = thread::spawn(move || loop {
             while let Ok(message) = receiver.lock().unwrap().recv() {
                 // unwrap is safe because we are the only one using the Receiver.
                 match message {
                     Message::NewJob(job) => {
-                        logger_sender.info(&format!("Worker {} got a job; executing.", id));
+                        info!("Worker {} got a job; executing.", id);
                         job();
                     }
                     Message::Terminate => {
-                        logger_sender.info(&format!("Worker {} was told to terminate.", id));
+                        info!("Worker {} was told to terminate.", id);
                         break;
                     }
                 }

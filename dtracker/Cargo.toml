@@ -13,3 +13,4 @@ bencoder = {path = "../bencoder"}
 url_encoder = { path = "../url_encoder" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tracing = "0.1"

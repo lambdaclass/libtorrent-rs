@@ -19,13 +19,10 @@ fn main() {
     let (status, _status_reciever) = AtomicTorrentStatus::new(&parsed, config.clone());
     let mut torrent_with_status = HashMap::new();
     torrent_with_status.insert(parsed, Arc::new(status));
-    let logger = Logger::new(&config.log_directory, config.max_log_file_kb_size)
-        .expect("logger could not be created");
     let client_peer_id = "client_peer_id".to_string();
     let mut server = BtServer::new(
         torrent_with_status,
         config,
-        logger.new_sender(),
         client_peer_id,
     );
     println!("Initializing server ...");

@@ -3,6 +3,7 @@ use std::{io, thread::spawn};
 
 use chrono::Duration;
 use logger::{logger_error::LoggerError, logger_receiver::Logger, logger_sender::LoggerSender};
+use tracing::{info, warn};
 
 use crate::{
     http_server::server::Server, stats::stats_updater::StatsUpdater,
@@ -34,12 +35,12 @@ impl BtTracker {
         let tracker_status = Arc::new(AtomicTrackerStatus::default());
 
         let stats_updater =
-            Self::spawn_stats_updater(tracker_status.clone(), logger_sender.clone());
+            Self::spawn_stats_updater(tracker_status.clone());
 
-        let server = Server::init(tracker_status, stats_updater, logger_sender.clone(), port)
+        let server = Server::init(tracker_status, stats_updater, port)
             .map_err(BtTrackerError::CreatingServerError)?;
 
-        logger_sender.info("Tracker started");
+        info!("Tracker started");
 
         Ok(Self { server })
     }
@@ -53,12 +54,10 @@ impl BtTracker {
 
     fn spawn_stats_updater(
         tracker_status: Arc<AtomicTrackerStatus>,
-        logger_sender: LoggerSender,
     ) -> Arc<StatsUpdater> {
         let stats_updater = Arc::new(StatsUpdater::new(
             tracker_status,
             Duration::minutes(STATS_UPDATER_MINUTES_TIMEOUT),
-            logger_sender,
         ));
         let updater = stats_updater.clone();
         spawn(move || {
