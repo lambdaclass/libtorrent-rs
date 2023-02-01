@@ -13,6 +13,9 @@ fn main() {
     let mut arg = env::args();
     let path = PathBuf::from((arg.nth(1).expect("Failed to retrieve file path")).trim());
 
+    // install global collector configured based on RUST_LOG env var.
+    tracing_subscriber::fmt::init();
+
     // Initializes the server
     let parsed = TorrentParser::parse(&path).expect("parser could not find the file");
     let config = Cfg::new("./dtorrent/config.cfg").expect("config file not found");

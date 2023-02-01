@@ -14,3 +14,4 @@ bencoder = { path = "../bencoder" }
 logger = { path = "../logger"}
 url_encoder = { path = "../url_encoder" }
 tracing = "0.1"
+tracing-subscriber = "0.3"

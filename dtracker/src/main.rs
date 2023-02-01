@@ -3,6 +3,9 @@ use std::env;
 use tracing::error;
 
 fn main() {
+    // install global collector configured based on RUST_LOG env var.
+    tracing_subscriber::fmt::init();
+
     if env::args().count() != 2 {
         return error!("Incorrect number of arguments. Only a port number should be passed");
     };
