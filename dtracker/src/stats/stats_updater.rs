@@ -2,8 +2,7 @@ use chrono::Duration;
 use std::sync::{Mutex, MutexGuard};
 use std::{sync::Arc, thread::sleep};
 
-use logger::logger_sender::LoggerSender;
-use tracing::{warn, info, error};
+use tracing::{warn, info};
 use crate::tracker_status::atomic_tracker_status::AtomicTrackerStatus;
 use crate::tracker_status::current_tracker_stats::CurrentTrackerStats;
 

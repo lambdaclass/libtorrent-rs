@@ -2,11 +2,11 @@ use dtorrent::{
     bt_server::server::BtServer, config::cfg::Cfg, torrent_handler::status::AtomicTorrentStatus,
     torrent_parser::parser::TorrentParser,
 };
-use logger::logger_receiver::Logger;
 use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
+use tracing::info;
 
 fn main() {
     // Reads the filepath from the command line argument (Check README)
@@ -25,6 +25,6 @@ fn main() {
         config,
         client_peer_id,
     );
-    println!("Initializing server ...");
+    info!("Initializing server ...");
     server.init().expect("Failed to initialize server");
 }

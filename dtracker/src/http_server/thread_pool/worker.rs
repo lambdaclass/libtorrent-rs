@@ -4,7 +4,6 @@ use std::{
 };
 
 use tracing::info;
-use logger::logger_sender::LoggerSender;
 
 type Job = Box<dyn FnOnce() + Send + 'static>;
 

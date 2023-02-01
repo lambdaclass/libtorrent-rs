@@ -1,6 +1,5 @@
 use std::{net::TcpListener, sync::Arc};
 
-use logger::logger_sender::LoggerSender;
 use tracing::{error, info};
 use crate::http_server::request_handler::RequestHandler;
 use crate::stats::stats_updater::StatsUpdater;
@@ -45,7 +44,7 @@ impl Server {
     pub fn serve(&self) -> std::io::Result<()> {
         let started_msg = format!("Serving on http://0.0.0.0:{}", self.port);
         info!(started_msg);
-        println!("{}", started_msg);
+        info!("{}", started_msg);
 
         for stream in self.listener.incoming() {
             let stream = stream?;

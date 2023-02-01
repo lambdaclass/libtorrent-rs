@@ -12,7 +12,6 @@ use crate::{
         tracker_response::TrackerResponse,
     },
 };
-use logger::logger_sender::LoggerSender;
 use std::{
     sync::{
         mpsc::{self, Receiver},

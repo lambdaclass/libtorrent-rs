@@ -2,8 +2,7 @@ use std::sync::Arc;
 use std::{io, thread::spawn};
 
 use chrono::Duration;
-use logger::{logger_error::LoggerError, logger_receiver::Logger, logger_sender::LoggerSender};
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::{
     http_server::server::Server, stats::stats_updater::StatsUpdater,
@@ -19,7 +18,6 @@ pub struct BtTracker {
 
 #[derive(Debug)]
 pub enum BtTrackerError {
-    LoggerInitError(LoggerError),
     CreatingServerError(io::Error),
     StartingServerError(io::Error),
 }
@@ -29,9 +27,6 @@ const STATS_UPDATER_MINUTES_TIMEOUT: i64 = 1;
 impl BtTracker {
     /// Creates a new BtTracker
     pub fn init(port: u16) -> Result<Self, BtTrackerError> {
-        let logger = Logger::new("./logs", 1000000).map_err(BtTrackerError::LoggerInitError)?; // TODO: Sacar de configs
-        let logger_sender = logger.new_sender();
-
         let tracker_status = Arc::new(AtomicTrackerStatus::default());
 
         let stats_updater =

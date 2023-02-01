@@ -7,7 +7,6 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use logger::logger_sender::LoggerSender;
 use tracing::{info, warn};
 use sha1::{Digest, Sha1};
 
@@ -314,12 +313,10 @@ impl PeerSession {
         info!("Piece {} downloaded!", piece_index);
 
         let remaining_pieces = self.torrent_status.downloaded_pieces();
-        println!(
-            "*** Torrent: {} - Pieces downloaded: {} / {}",
+        info!("*** Torrent: {} - Pieces downloaded: {} / {}",
             self.torrent.name(),
             remaining_pieces,
-            self.torrent.total_pieces()
-        );
+            self.torrent.total_pieces());
 
         Ok(())
     }

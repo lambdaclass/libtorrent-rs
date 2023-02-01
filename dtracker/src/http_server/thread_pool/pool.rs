@@ -3,7 +3,6 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use logger::logger_sender::LoggerSender;
 use tracing::{info, error};
 use crate::http_server::thread_pool::worker::{Message, Worker};
 
