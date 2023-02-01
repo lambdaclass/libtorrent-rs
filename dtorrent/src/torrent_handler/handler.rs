@@ -1,5 +1,4 @@
 use super::status::{AtomicTorrentStatus, AtomicTorrentStatusError};
-use tracing::{info, warn, error};
 use crate::{
     config::cfg::Cfg,
     peer::{
@@ -20,6 +19,7 @@ use std::{
     thread,
     time::Duration,
 };
+use tracing::{error, info, warn};
 
 /// Struct for handling the torrent download.
 ///
@@ -44,11 +44,7 @@ pub enum TorrentHandlerError {
 
 impl TorrentHandler {
     /// Creates a new `TorrentHandler` from a torrent, a config and a logger sender.
-    pub fn new(
-        torrent: Torrent,
-        config: Cfg,
-        client_peer_id: String,
-    ) -> Self {
+    pub fn new(torrent: Torrent, config: Cfg, client_peer_id: String) -> Self {
         let (torrent_status, torrent_status_receiver) =
             AtomicTorrentStatus::new(&torrent, config.clone());
 

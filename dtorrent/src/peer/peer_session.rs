@@ -7,8 +7,8 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use tracing::{info, warn};
 use sha1::{Digest, Sha1};
+use tracing::{info, warn};
 
 use crate::{
     config::cfg::Cfg,
@@ -114,7 +114,10 @@ impl PeerSession {
             .send_handshake(stream)
             .map_err(PeerSessionError::MessageHandlerError)?;
 
-        info!("IP: {}:{} Handshake successful", self.peer.ip, self.peer.port);
+        info!(
+            "IP: {}:{} Handshake successful",
+            self.peer.ip, self.peer.port
+        );
 
         self.message_handler
             .send_bitfield(stream)
@@ -313,10 +316,12 @@ impl PeerSession {
         info!("Piece {} downloaded!", piece_index);
 
         let remaining_pieces = self.torrent_status.downloaded_pieces();
-        info!("*** Torrent: {} - Pieces downloaded: {} / {}",
+        info!(
+            "*** Torrent: {} - Pieces downloaded: {} / {}",
             self.torrent.name(),
             remaining_pieces,
-            self.torrent.total_pieces());
+            self.torrent.total_pieces()
+        );
 
         Ok(())
     }

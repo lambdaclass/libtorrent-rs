@@ -20,10 +20,7 @@ pub struct Worker {
 
 impl Worker {
     /// Returns a new Worker instance that holds the `id` and a thread spawned with an empty closure.
-    pub fn new(
-        id: usize,
-        receiver: Arc<Mutex<Receiver<Message>>>,
-    ) -> Worker {
+    pub fn new(id: usize, receiver: Arc<Mutex<Receiver<Message>>>) -> Worker {
         let thread = thread::spawn(move || loop {
             while let Ok(message) = receiver.lock().unwrap().recv() {
                 // unwrap is safe because we are the only one using the Receiver.

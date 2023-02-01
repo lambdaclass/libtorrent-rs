@@ -2,9 +2,9 @@ use chrono::Duration;
 use std::sync::{Mutex, MutexGuard};
 use std::{sync::Arc, thread::sleep};
 
-use tracing::{warn, info};
 use crate::tracker_status::atomic_tracker_status::AtomicTrackerStatus;
 use crate::tracker_status::current_tracker_stats::CurrentTrackerStats;
+use tracing::{info, warn};
 
 // for 1 month it takes 0.5 miliseconds to update the stats. And 0.5 Megabytes to store the stats.
 const MAX_DAYS_TO_KEEP_STATS: u64 = 30;
@@ -19,10 +19,7 @@ pub struct StatsUpdater {
 
 impl StatsUpdater {
     /// Creates a new `StatsUpdater`.
-    pub fn new(
-        tracker_status: Arc<AtomicTrackerStatus>,
-        timeout: Duration,
-    ) -> Self {
+    pub fn new(tracker_status: Arc<AtomicTrackerStatus>, timeout: Duration) -> Self {
         Self {
             duration: timeout,
             tracker_status,

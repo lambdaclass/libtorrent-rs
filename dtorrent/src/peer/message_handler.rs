@@ -1,5 +1,5 @@
 use std::{io::Write, net::TcpStream, sync::Arc};
-use tracing::{info};
+use tracing::info;
 
 use crate::{
     torrent_handler::status::{AtomicTorrentStatus, AtomicTorrentStatusError},

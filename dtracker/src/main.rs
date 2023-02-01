@@ -1,6 +1,6 @@
+use dtracker::bt_tracker::tracker::BtTracker;
 use std::env;
 use tracing::error;
-use dtracker::bt_tracker::tracker::BtTracker;
 
 fn main() {
     if env::args().count() != 2 {

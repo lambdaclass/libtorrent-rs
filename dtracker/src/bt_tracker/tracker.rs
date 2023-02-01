@@ -29,8 +29,7 @@ impl BtTracker {
     pub fn init(port: u16) -> Result<Self, BtTrackerError> {
         let tracker_status = Arc::new(AtomicTrackerStatus::default());
 
-        let stats_updater =
-            Self::spawn_stats_updater(tracker_status.clone());
+        let stats_updater = Self::spawn_stats_updater(tracker_status.clone());
 
         let server = Server::init(tracker_status, stats_updater, port)
             .map_err(BtTrackerError::CreatingServerError)?;
@@ -47,9 +46,7 @@ impl BtTracker {
             .map_err(BtTrackerError::StartingServerError)
     }
 
-    fn spawn_stats_updater(
-        tracker_status: Arc<AtomicTrackerStatus>,
-    ) -> Arc<StatsUpdater> {
+    fn spawn_stats_updater(tracker_status: Arc<AtomicTrackerStatus>) -> Arc<StatsUpdater> {
         let stats_updater = Arc::new(StatsUpdater::new(
             tracker_status,
             Duration::minutes(STATS_UPDATER_MINUTES_TIMEOUT),

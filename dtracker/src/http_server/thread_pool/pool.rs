@@ -3,8 +3,8 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use tracing::{info, error};
 use crate::http_server::thread_pool::worker::{Message, Worker};
+use tracing::{error, info};
 
 pub enum ThreadPoolError {
     MessageSendError(mpsc::SendError<Message>),
@@ -32,16 +32,10 @@ impl ThreadPool {
         let mut workers = Vec::with_capacity(size);
 
         for id in 0..size {
-            workers.push(Worker::new(
-                id,
-                Arc::clone(&receiver),
-            ));
+            workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        ThreadPool {
-            workers,
-            sender,
-        }
+        ThreadPool { workers, sender }
     }
 
     /// Receives a closure and assigns it to a thread in the pool to run.

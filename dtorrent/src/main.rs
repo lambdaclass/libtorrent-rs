@@ -20,11 +20,7 @@ fn main() {
     let mut torrent_with_status = HashMap::new();
     torrent_with_status.insert(parsed, Arc::new(status));
     let client_peer_id = "client_peer_id".to_string();
-    let mut server = BtServer::new(
-        torrent_with_status,
-        config,
-        client_peer_id,
-    );
+    let mut server = BtServer::new(torrent_with_status, config, client_peer_id);
     info!("Initializing server ...");
     server.init().expect("Failed to initialize server");
 }

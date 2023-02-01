@@ -1,12 +1,12 @@
 use std::{net::TcpListener, sync::Arc};
 
-use tracing::{error, info};
 use crate::http_server::request_handler::RequestHandler;
 use crate::stats::stats_updater::StatsUpdater;
 use crate::{
     http_server::thread_pool::pool::ThreadPool,
     tracker_status::atomic_tracker_status::AtomicTrackerStatus,
 };
+use tracing::{error, info};
 
 /// Struct that represents the HTTP Server that will listen to connections to the Tracker.
 ///
@@ -42,9 +42,7 @@ impl Server {
 
     /// Handles new connections to the server
     pub fn serve(&self) -> std::io::Result<()> {
-        let started_msg = format!("Serving on http://0.0.0.0:{}", self.port);
-        info!(started_msg);
-        info!("{}", started_msg);
+        info!("Serving on http://0.0.0.0:{}", self.port);
 
         for stream in self.listener.incoming() {
             let stream = stream?;
