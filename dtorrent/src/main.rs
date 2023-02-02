@@ -5,7 +5,6 @@ use dtorrent::{
 };
 use logger::logger_receiver::Logger;
 use std::collections::HashMap;
-use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
 
