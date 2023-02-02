@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4"
-logger = { path = "../logger"}
 rand = "0.8.5"
 bencoder = {path = "../bencoder"}
 url_encoder = { path = "../url_encoder" }
