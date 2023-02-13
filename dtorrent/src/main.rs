@@ -8,7 +8,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tracing::info;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Reads the filepath from the command line argument (Check README)
     let mut arg = env::args();
     let path = PathBuf::from((arg.nth(1).expect("Failed to retrieve file path")).trim());
