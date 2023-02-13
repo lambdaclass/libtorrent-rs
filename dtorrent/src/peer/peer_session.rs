@@ -7,8 +7,8 @@ use std::{
 };
 
 use chrono::{DateTime, Local};
-use logger::logger_sender::LoggerSender;
 use sha1::{Digest, Sha1};
+use tracing::{info, warn};
 
 use crate::{
     config::cfg::Cfg,
@@ -61,7 +61,6 @@ pub struct PeerSession {
     torrent_status: Arc<AtomicTorrentStatus>,
     current_piece: u32,
     config: Cfg,
-    logger_sender: LoggerSender,
     message_handler: MessageHandler,
     client_peer_id: String,
 }
@@ -72,7 +71,6 @@ impl PeerSession {
         torrent: Torrent,
         torrent_status: Arc<AtomicTorrentStatus>,
         config: Cfg,
-        logger_sender: LoggerSender,
         client_peer_id: String,
     ) -> Result<Self, PeerSessionError> {
         let our_bitfield = Bitfield::new(
@@ -85,7 +83,6 @@ impl PeerSession {
         let message_handler = MessageHandler::new(
             torrent.clone(),
             torrent_status.clone(),
-            logger_sender.clone(),
             client_peer_id.clone(),
         );
 
@@ -100,7 +97,6 @@ impl PeerSession {
             torrent_status,
             current_piece: 0,
             config,
-            logger_sender,
             message_handler,
             client_peer_id,
         })
@@ -118,19 +114,16 @@ impl PeerSession {
             .send_handshake(stream)
             .map_err(PeerSessionError::MessageHandlerError)?;
 
-        self.logger_sender.info(&format!(
+        info!(
             "IP: {}:{} Handshake successful",
             self.peer.ip, self.peer.port
-        ));
+        );
 
         self.message_handler
             .send_bitfield(stream)
             .map_err(PeerSessionError::MessageHandlerError)?;
 
-        self.logger_sender.info(&format!(
-            "IP: {}:{} Bitfield sent",
-            self.peer.ip, self.peer.port
-        ));
+        info!("IP: {}:{} Bitfield sent", self.peer.ip, self.peer.port);
 
         Ok(())
     }
@@ -235,7 +228,7 @@ impl PeerSession {
             .receive_handshake(&mut stream)
             .map_err(PeerSessionError::BtPeerError)?;
 
-        self.logger_sender.info("Handshake successful");
+        info!("Handshake successful");
 
         // Avoid connecting to ourself.
         match &self.peer.peer_id {
@@ -319,11 +312,11 @@ impl PeerSession {
         self.check_last_piece_block(piece_index, entire_blocks_in_piece, stream)?;
 
         self.validate_piece(&self.piece, piece_index)?;
-        self.logger_sender
-            .info(&format!("Piece {} downloaded!", piece_index));
+
+        info!("Piece {} downloaded!", piece_index);
 
         let remaining_pieces = self.torrent_status.downloaded_pieces();
-        println!(
+        info!(
             "*** Torrent: {} - Pieces downloaded: {} / {}",
             self.torrent.name(),
             remaining_pieces,
@@ -635,9 +628,7 @@ impl PeerSession {
         for b in bytes {
             match write!(&mut res, "{:02x}", b) {
                 Ok(()) => (),
-                Err(_) => self
-                    .logger_sender
-                    .warn("Error converting bytes to hex string!"),
+                Err(_) => warn!("Error converting bytes to hex string!"),
             }
         }
         res
