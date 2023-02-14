@@ -11,6 +11,8 @@ native-tls = "0.2"
 chrono = "0.4"
 rand = "0.8.5"
 bencoder = { path = "../bencoder" }
-logger = { path = "../logger"}
+tokio = { version = "1", features = ["rt-multi-thread","macros"]}
 url_encoder = { path = "../url_encoder" }
 clap = { version = "4.1.1", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"

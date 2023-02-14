@@ -1,5 +1,5 @@
-use logger::logger_sender::LoggerSender;
 use std::{io::Write, net::TcpStream, sync::Arc};
+use tracing::info;
 
 use crate::{
     torrent_handler::status::{AtomicTorrentStatus, AtomicTorrentStatusError},
@@ -25,7 +25,6 @@ pub enum MessageHandlerError {
 pub struct MessageHandler {
     torrent: Torrent,
     torrent_status: Arc<AtomicTorrentStatus>,
-    logger_sender: LoggerSender,
     client_peer_id: String,
 }
 
@@ -33,13 +32,11 @@ impl MessageHandler {
     pub fn new(
         torrent: Torrent,
         torrent_status: Arc<AtomicTorrentStatus>,
-        logger_sender: LoggerSender,
         client_peer_id: String,
     ) -> MessageHandler {
         Self {
             torrent,
             torrent_status,
-            logger_sender,
             client_peer_id,
         }
     }
@@ -84,8 +81,7 @@ impl MessageHandler {
         let piece_msg = Message::new(MessageId::Piece, payload);
         self.send(stream, piece_msg)?;
 
-        self.logger_sender
-            .info(&format!("Sent piece: {} / Offset: {}", index, begin));
+        info!("Sent piece: {} / Offset: {}", index, begin);
 
         Ok(())
     }
@@ -147,8 +143,8 @@ impl MessageHandler {
         let cancel_msg = Message::new(MessageId::Cancel, payload);
         self.send(stream, cancel_msg)?;
 
-        self.logger_sender
-            .info(&format!("Cancel piece: {} / Offset: {}", index, begin));
+        info!("Cancel piece: {} / Offset: {}", index, begin);
+
         Ok(())
     }
 
