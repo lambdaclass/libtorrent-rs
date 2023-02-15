@@ -2,7 +2,6 @@
 
 members = [
     "dtorrent",
-    "dtracker",
     "bencoder",
     "url_encoder"
 ]

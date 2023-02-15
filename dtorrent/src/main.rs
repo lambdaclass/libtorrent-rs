@@ -4,7 +4,6 @@ use dtorrent::{
     torrent_parser::parser::TorrentParser,
 };
 use std::collections::HashMap;
-use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tracing::info;
