@@ -66,7 +66,7 @@ impl TorrentHandler {
     /// - `TrackerErr` if there was a problem connecting to the tracker or getting the peers.
     /// - `TorrentStatusError` if there was a problem using the `Torrent Status`.
     /// - `TorrentStatusRecvError` if there was a problem receiving from the receiver of `Torrent Status`.
-    pub fn handle(&mut self) -> Result<(), TorrentHandlerError> {
+    pub async fn handle(&mut self) -> Result<(), TorrentHandlerError> {
         let tracker_handler = TrackerHandler::new(
             self.torrent.clone(),
             self.config.tcp_port.into(),
@@ -76,7 +76,7 @@ impl TorrentHandler {
         info!("Connected to tracker.");
 
         while !self.torrent_status.is_finished() {
-            let peer_list = self.get_peers_list(&tracker_handler)?;
+            let peer_list = self.get_peers_list(&tracker_handler).await?;
             info!("Tracker peer list obtained.");
 
             // Start connection with each peer
@@ -126,12 +126,13 @@ impl TorrentHandler {
         self.torrent_status.clone()
     }
 
-    fn get_peers_list(
+    async fn get_peers_list(
         &self,
         tracker_handler: &TrackerHandler,
     ) -> Result<Vec<BtPeer>, TorrentHandlerError> {
         let tracker_response = tracker_handler
             .get_peers_list()
+            .await
             .map_err(TorrentHandlerError::TrackerError)?;
 
         self.update_total_peers(&tracker_response);
