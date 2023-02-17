@@ -94,10 +94,10 @@ mod tests {
     fn test_get_peers_list() {
         let torrent = create_test_torrent(
             "https://torrent.ubuntu.com:443/announce",
-            "2c6b6858d61da9543d4231a71db4b1c9264b0685",
+            "e82753b6692c4f3f3646b055f70ee390309020e6",
         );
         let test_port = 6969;
-        let test_peer_id = "test_peer_id".to_string();
+        let test_peer_id = "-qB4500-k51bMCWVA(~!".to_string();
 
         let tracker_handler = TrackerHandler::new(torrent, test_port, test_peer_id).unwrap();
 
@@ -111,7 +111,7 @@ mod tests {
             "f834824904be1854c89ba007c01678ff797f8dc7",
         );
         let test_port = 6969;
-        let test_peer_id = "test_peer_id".to_string();
+        let test_peer_id = "-qB4500-k51bMCWVA(~!".to_string();
 
         let tracker_handler = TrackerHandler::new(torrent, test_port, test_peer_id).unwrap();
 
