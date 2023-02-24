@@ -162,12 +162,12 @@ mod tests {
     #[test]
     fn test_http_handler_https_request() {
         let http_handler = HttpHandler::new(
-            url_parser::TrackerUrl::parse("https://torrent.ubuntu.com:443/announce").unwrap(),
+            url_parser::TrackerUrl::parse("https://torrent.ubuntu.com/announce").unwrap(),
             QueryParams::new(
-                "2c6b6858d61da9543d4231a71db4b1c9264b0685".to_string(),
+                "e82753b6692c4f3f3646b055f70ee390309020e6".to_string(),
                 6969,
                 100,
-                "test_peer_id".to_string(),
+                "-qB4500-k51bMCWVA(~!".to_string(),
             ),
         );
         let response = http_handler.https_request().unwrap();
@@ -201,7 +201,7 @@ mod tests {
                 "f834824904be1854c89ba007c01678ff797f8dc7".to_string(),
                 6969,
                 100,
-                "test_peer_id".to_string(),
+                "-qB4500-k51bMCWVA(~!".to_string(),
             ),
         );
         let response = http_handler.http_request().unwrap();
