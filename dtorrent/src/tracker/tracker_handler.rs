@@ -56,7 +56,7 @@ impl TrackerHandler {
     /// - There was a problem writing to the tracker.
     /// - There was a problem reading the tracker's response.
     /// - There was a problem decoding the parser response.
-    pub fn get_peers_list(&self) -> Result<TrackerResponse, TrackerHandlerError> {
+    pub async fn get_peers_list(&self) -> Result<TrackerResponse, TrackerHandlerError> {
         let query_params = QueryParams::new(
             self.torrent.info_hash.clone(),
             self.client_port,
@@ -67,12 +67,12 @@ impl TrackerHandler {
         let http_handler = HttpHandler::new(self.tracker_url.clone(), query_params);
 
         let response = if self.tracker_url.protocol == ConnectionProtocol::Https {
-            match http_handler.https_request() {
+            match http_handler.https_request().await {
                 Ok(response) => response,
                 Err(err) => return Err(TrackerHandlerError::HttpHandlerError(err)),
             }
         } else {
-            match http_handler.http_request() {
+            match http_handler.http_request().await {
                 Ok(response) => response,
                 Err(err) => return Err(TrackerHandlerError::HttpHandlerError(err)),
             }
@@ -90,8 +90,8 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_get_peers_list() {
+    #[tokio::test]
+    async fn test_get_peers_list() {
         let torrent = create_test_torrent(
             "https://torrent.ubuntu.com:443/announce",
             "e82753b6692c4f3f3646b055f70ee390309020e6",
@@ -100,12 +100,12 @@ mod tests {
         let test_peer_id = "-qB4500-k51bMCWVA(~!".to_string();
 
         let tracker_handler = TrackerHandler::new(torrent, test_port, test_peer_id).unwrap();
-
-        assert!(!tracker_handler.get_peers_list().unwrap().peers.is_empty());
+        println!("{:?}", tracker_handler.get_peers_list().await.unwrap());
+        assert!(!tracker_handler.get_peers_list().await.unwrap().peers.is_empty());
     }
 
-    #[test]
-    fn test_http_request() {
+    #[tokio::test]
+    async fn test_http_request() {
         let torrent = create_test_torrent(
             "http://vps02.net.orel.ru/announce",
             "f834824904be1854c89ba007c01678ff797f8dc7",
@@ -115,7 +115,7 @@ mod tests {
 
         let tracker_handler = TrackerHandler::new(torrent, test_port, test_peer_id).unwrap();
 
-        assert!(!tracker_handler.get_peers_list().unwrap().peers.is_empty());
+        assert!(!tracker_handler.get_peers_list().await.unwrap().peers.is_empty());
     }
 
     // Auxiliar
